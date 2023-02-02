@@ -75,7 +75,7 @@ def AutoTempest(url):
         website2 = website1.find("a")
         website = website2['href']
 
-        vehicle = Car("$"+price.text, title.text.rstrip().lstrip(), mileage.text, "10", website)
+        vehicle = Car(price.text, title.text.rstrip().lstrip(), mileage.text, "10", website)
         if isBlackListed(vehicle):
             continue
         else:
@@ -86,22 +86,24 @@ def AutoTempest(url):
 
 def isBlackListed(car):
     f = open('Blacklist.txt','r')
-    blackList = f.readlines()
+    blackList = [i.strip('\n') for i in f.readlines()]
     if car.getId() in blackList:
         return True
     else:
         if car.getDistance() > 150.0:
             setBlackListed(car)
+            f.close()
             return True
         else:
+            f.close()
             return False
 
 
 def setBlackListed(car):
-    f = open('Blacklist.txt', 'w')
+    f = open('Blacklist.txt', 'a')
     f.write(car.getId()+'\n')
-    f.write()
     print("A Car Has Been Blacklisted")
+    f.close()
 
 
 def main():
@@ -138,25 +140,22 @@ def main():
     else:
 
         for i in todaysList:
+            carNum = todaysList.index(i)+1
+            print("Car "+str(carNum))
+            print(i)
 
-            if not isBlackListed(i):
+            url = str(i.getWebsite())
 
-                carNum = todaysList.index(i)+1
-                print("Car "+str(carNum))
-                print(i)
+            # MacOS
+            chrome_path = 'open -a /Applications/Google\ Chrome.app %s'
 
-                url = str(i.getWebsite())
+            # Windows
+            # chrome_path = 'C:/Program Files (x86)/Google/Chrome/Application/chrome.exe %s'
 
-                # MacOS
-                chrome_path = 'open -a /Applications/Google\ Chrome.app %s'
+            # Linux
+            # chrome_path = '/usr/bin/google-chrome %s'
 
-                # Windows
-                # chrome_path = 'C:/Program Files (x86)/Google/Chrome/Application/chrome.exe %s'
-
-                # Linux
-                # chrome_path = '/usr/bin/google-chrome %s'
-
-                webbrowser.get(chrome_path).open(url)
+            webbrowser.get(chrome_path).open(url)
 
         blackList = True
         while blackList:
@@ -165,11 +164,11 @@ def main():
             if not result.isdigit() and result != 'n':
                 print("Not a valid input. Try again.")
                 continue
-            elif result.isdigit() and (result > len(todaysList)+1 or result < 1):
+            elif result.isdigit() and (int(result) > len(todaysList) or int(result) < 1):
                 print("Not a valid input. Try again.")
                 continue
             elif result.isdigit():
-                setBlackListed(todaysList[result-1])
+                setBlackListed(todaysList[int(result)-1])
                 continue
             else:
                 break
