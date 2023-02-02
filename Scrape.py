@@ -138,7 +138,6 @@ def main():
 
         return
     else:
-
         for i in todaysList:
             carNum = todaysList.index(i)+1
             print("Car "+str(carNum))
@@ -158,19 +157,25 @@ def main():
             webbrowser.get(chrome_path).open(url)
 
         blackList = True
+        blackListCount = 0
         while blackList:
-            result = input("Want to blacklist a car? Type the number. If not, type 'N'. ")
-            result.lower()
-            if not result.isdigit() and result != 'n':
-                print("Not a valid input. Try again.")
-                continue
-            elif result.isdigit() and (int(result) > len(todaysList) or int(result) < 1):
-                print("Not a valid input. Try again.")
-                continue
-            elif result.isdigit():
-                setBlackListed(todaysList[int(result)-1])
-                continue
-            else:
+            if blackListCount >= len(todaysList):
+                print("You have blacklisted everything! No more cars for today")
                 break
+            else:
+                result = input("Want to blacklist a car? Type the number. If not, type 'N'. ")
+                result.lower()
+                if not result.isdigit() and result != 'n':
+                    print("Not a valid input. Try again.")
+                    continue
+                elif result.isdigit() and (int(result) > len(todaysList) or int(result) < 1):
+                    print("Not a valid input. Try again.")
+                    continue
+                elif result.isdigit():
+                    setBlackListed(todaysList[int(result)-1])
+                    blackListCount += 1
+                    continue
+                else:
+                    break
 
 main()
