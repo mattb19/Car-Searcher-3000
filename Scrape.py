@@ -1,13 +1,48 @@
 import requests
 from bs4 import BeautifulSoup
 from selenium import webdriver
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support import expected_conditions as EC
 from webdriver_manager.chrome import ChromeDriverManager
 from Car import Car
 import re
 import webbrowser
 
 
-def AutoTrader(url):
+def CarGurus(url):              # Scrapes CarGurus with extra comments
+    lst = []
+    page = requests.get(url)                                                        #
+    soup = BeautifulSoup(page.content, "html.parser")                               # Gets all html code and turns it into
+    results = soup.find(id="cargurus-listing-search")                               # a readable format
+    car_elements = results.find_all("div", class_="cardBodyPadding cardBody")       #
+
+    for car in car_elements:             # Searches each car's html code
+        price = car.find("span", class_="price")
+        price = price.text.lstrip().rstrip()
+        title = car.find("h4", class_="titleText")
+        title = title.text.lstrip().rstrip()
+        mileage = car.find("div", class_="mileage")
+        mileage = mileage.text.lstrip().rstrip()
+        distance = car.find("p", class_="distanceAndLocationText")
+        distance = distance.text.lstrip().rstrip().split(' ')[1]
+        if distance != "NC":
+            distance = 10000
+        else:
+            distance = 0
+        website2 = car.find("a")
+        website = url+website2['href']
+
+        vehicle = Car(price, title, mileage, distance, website)     # initializes car object
+        if isBlackListed(vehicle):              # determines if car should show up on todays list
+            continue
+        else:
+            lst.append(vehicle)
+
+    return lst
+
+
+def AutoTrader(url):            # Scrapes AutoTrader
     lst = []
     page = requests.get(url)
     soup = BeautifulSoup(page.content, "html.parser")
@@ -32,7 +67,7 @@ def AutoTrader(url):
     return lst
 
 
-def Edmunds(url):
+def Edmunds(url):               # Scrapes Edmunds
     lst = []
     browser = webdriver.Chrome(executable_path=ChromeDriverManager().install())
     browser.get(url)
@@ -58,7 +93,7 @@ def Edmunds(url):
     return lst
 
 
-def AutoTempest(url):
+def AutoTempest(url):           # Scrapes AutoTempest
     lst = []
     browser = webdriver.Chrome(executable_path=ChromeDriverManager().install())
     browser.get(url)
@@ -84,7 +119,7 @@ def AutoTempest(url):
     return lst
 
 
-def isBlackListed(car):
+def isBlackListed(car):         # Checks if car is blacklisted by car id
     f = open('Blacklist.txt','r')
     blackList = [i.strip('\n') for i in f.readlines()]
     if car.getId() in blackList:
@@ -99,7 +134,7 @@ def isBlackListed(car):
             return False
 
 
-def setBlackListed(car):
+def setBlackListed(car):        # Adds a car's id to blacklist
     f = open('Blacklist.txt', 'a')
     f.write(car.getId()+'\n')
     print("A Car Has Been Blacklisted")
@@ -108,9 +143,10 @@ def setBlackListed(car):
 
 def main():
     f = open('urls.txt', 'r')
-    siteList = [i.split("`") for i in f.readlines()]
+    siteList = [i.split("`") for i in f.readlines()]    # getting all websites in urls.txt
     todaysList = []
-    for i in siteList:
+
+    for i in siteList:               # filters urls by website name, initializes their scraper
         url = i[1].strip('\n')
         if i[0] == 'AutoTrader':
             todaysList += AutoTrader(url)
@@ -118,11 +154,13 @@ def main():
             todaysList += AutoTempest(url)
         elif i[0] == 'Edmunds':
             todaysList += Edmunds(url)
+        elif i[0] == 'CarGurus':
+            todaysList += CarGurus(url)
         else:
             print("Error in urls.txt")
             return
 
-    if len(todaysList) == 0:
+    if len(todaysList) == 0:            # checks if there are no new cars
         url = "https://puginarug.com/"
 
         # MacOS
@@ -138,7 +176,7 @@ def main():
 
         return
     else:
-        for i in todaysList:
+        for i in todaysList:            # opens each new car listing
             carNum = todaysList.index(i)+1
             print("Car "+str(carNum))
             print(i)
@@ -158,7 +196,7 @@ def main():
 
         blackList = True
         blackListCount = 0
-        while blackList:
+        while blackList:                # lets user choose which cars to blacklist
             if blackListCount >= len(todaysList):
                 print("You have blacklisted everything! No more cars for today")
                 break
@@ -177,5 +215,6 @@ def main():
                     continue
                 else:
                     break
+
 
 main()
