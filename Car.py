@@ -47,4 +47,7 @@ class Car:
         self._website = value
     
     def __str__(self):
-        return "Name:    "+self._name+"\nPrice:   "+self._price+"\nMileage: "+self._mileage+"\n"
+        return "Name:      "+self._name+"\nPrice:     "+self._price+"\nMileage:   "+self._mileage+"\n"
+
+    def __repr__(self):
+        return "Name:      "+self._name+"\nPrice:     "+self._price+"\nMileage:   "+self._mileage+"\n"
