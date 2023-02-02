@@ -64,19 +64,18 @@ def AutoTempest(url):
     browser.get(url)
     soup = BeautifulSoup(browser.page_source, "html.parser")
     browser.close()
-    results = soup.find(id="main-content")
-    print(results)
-    car_elements = results.find_all("div", class_="vehicle-info d-flex flex-column px-1 pt-1 pb-0_5")
+    results = soup.find(id="results-body")
+    car_elements = results.find_all("li", class_="result-list-item")
 
     for car in car_elements:
-        price = car.find("span", class_="heading-3")
-        title = car.find("div", class_="size-16 font-weight-bold mb-0_5 text-primary-darker")
-        mileage = car.find("div", class_="key-point size-14 d-flex align-items-baseline mt-0_5 col-12")
-        distance = car.find("span", class_="text-gray-dark")
-        website1 = car.find("a", class_="usurp-inventory-card-vdp-link")
-        website = "https://edmunds.com"+website1['href']
+        price = car.find("div", class_="badge__label label--price")
+        title = car.find("span", class_="title-wrap listing-title")
+        mileage = car.find("span", class_="mileage")
+        website1 = car.find("span", class_="title-wrap listing-title")
+        website2 = website1.find("a")
+        website = website2['href']
 
-        vehicle = Car(price.text, title.text, mileage.text, re.findall(r'\d', distance.text.strip())[0], website)
+        vehicle = Car("$"+price.text, title.text.rstrip().lstrip(), mileage.text, "10", website)
         if isBlackListed(vehicle):
             continue
         else:
@@ -110,12 +109,13 @@ def main():
     siteList = [i.split("`") for i in f.readlines()]
     todaysList = []
     for i in siteList:
+        url = i[1].strip('\n')
         if i[0] == 'AutoTrader':
-            todaysList += AutoTrader(i[1])
+            todaysList += AutoTrader(url)
         elif i[0] == 'AutoTempest':
-            todaysList += AutoTempest(i[1])
+            todaysList += AutoTempest(url)
         elif i[0] == 'Edmunds':
-            todaysList += AutoTempest(i[1])
+            todaysList += Edmunds(url)
         else:
             print("Error in urls.txt")
             return
@@ -139,7 +139,7 @@ def main():
 
         for i in todaysList:
 
-            if not i.isBlackListed():
+            if not isBlackListed(i):
 
                 carNum = todaysList.index(i)+1
                 print("Car "+str(carNum))
