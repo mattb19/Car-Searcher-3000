@@ -70,6 +70,7 @@ def Edmunds(url):               # Scrapes Edmunds
     lst = []
     browser = webdriver.Chrome(executable_path=ChromeDriverManager().install())
     browser.get(url)
+    browser.implicitly_wait(2)
     soup = BeautifulSoup(browser.page_source, "html.parser")
     browser.close()
     results = soup.find(id="main-content")
@@ -92,10 +93,11 @@ def Edmunds(url):               # Scrapes Edmunds
     return lst
 
 
-def CarsForSale(url):               # Scrapes CarsForSale
+def CarsForSale(url):           # Scrapes CarsForSale
     lst = []
     browser = webdriver.Chrome(executable_path=ChromeDriverManager().install())
     browser.get(url)
+    browser.implicitly_wait(2)
     soup = BeautifulSoup(browser.page_source, "html.parser")
     browser.close()
     results = soup.find(id="on-canvas-results")
@@ -122,6 +124,7 @@ def AutoTempest(url):           # Scrapes AutoTempest
     lst = []
     browser = webdriver.Chrome(executable_path=ChromeDriverManager().install())
     browser.get(url)
+    browser.implicitly_wait(2)
     soup = BeautifulSoup(browser.page_source, "html.parser")
     browser.close()
     results = soup.find(id="results-body")
