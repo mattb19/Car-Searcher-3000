@@ -92,6 +92,32 @@ def Edmunds(url):               # Scrapes Edmunds
     return lst
 
 
+def CarsForSale(url):               # Scrapes CarsForSale
+    lst = []
+    browser = webdriver.Chrome(executable_path=ChromeDriverManager().install())
+    browser.get(url)
+    soup = BeautifulSoup(browser.page_source, "html.parser")
+    browser.close()
+    results = soup.find(id="on-canvas-results")
+    car_elements = results.find_all("li", class_="snapshot")
+
+    for car in car_elements:
+        price = car.find("li", class_="snapshot__details-price")
+        title = car.find("a", class_="snapshot__title")
+        mileage = car.find("li", class_="snapshot__details-miles")
+        distance = 0
+        website1 = car.find("a", class_="snapshot__title")
+        website = "https://carsforsale.com"+website1['href']
+
+        vehicle = Car(price.text, title.text, mileage.text, distance, website)
+        if isBlackListed(vehicle):
+            continue
+        else:
+            lst.append(vehicle)
+
+    return lst
+
+
 def AutoTempest(url):           # Scrapes AutoTempest
     lst = []
     browser = webdriver.Chrome(executable_path=ChromeDriverManager().install())
@@ -155,6 +181,8 @@ def main():
             todaysList += Edmunds(url)
         elif i[0] == 'CarGurus':
             todaysList += CarGurus(url)
+        elif i[0] == 'CarsForSale':
+            todaysList += CarsForSale(url)
         else:
             print("Error in urls.txt")
             return
