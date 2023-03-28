@@ -23,6 +23,8 @@ def CarGurus(url):              # Scrapes CarGurus with extra comments
         title = title.text.lstrip().rstrip()
         mileage = car.find("div", class_="mileage")
         mileage = mileage.text.lstrip().rstrip()
+        miles = mileage[0:6]
+        
         distance = car.find("p", class_="distanceAndLocationText")
         distance = distance.text.lstrip().rstrip().split(' ')[1]
         if distance != "NC":
@@ -31,8 +33,14 @@ def CarGurus(url):              # Scrapes CarGurus with extra comments
             distance = 0
         website2 = car.find("a")
         website = url+website2['href']
+        
+        counter = 0
+        price1 = ""
+        while counter < 7:
+            price1 += price[counter]
+            counter += 1
 
-        vehicle = Car(price, title, mileage, distance, website)     # initializes car object
+        vehicle = Car(price1, title, miles, distance, website)     # initializes car object
         if isBlackListed(vehicle):              # determines if car should show up on todays list
             continue
         else:
@@ -50,14 +58,23 @@ def AutoTrader(url):            # Scrapes AutoTrader
 
     for car in car_elements:
         price = car.find("span", class_="first-price")
+        price = price.text
         title = car.find("h2", class_="text-bold text-size-400 text-size-sm-500 link-unstyled")
         mileage = car.find("ul", class_="list list-inline display-inline margin-bottom-0 pipe-delimited text-gray text-size-300")
+        mileage = mileage.text
+        miles = mileage[0:6]
         distance = car.find("span", class_="text-normal padding-left-1")
         website1 = car.find("div", class_="display-flex justify-content-between")
         website2 = website1.find("a")
         website = "https://autotrader.com"+website2['href']
+        
+        counter = 0
+        price1 = "$"
+        while counter < 6:
+            price1 += price[counter]
+            counter += 1
 
-        vehicle = Car("$"+price.text, title.text, mileage.text, re.findall(r'\d+\.\d+', distance.text.strip())[0], website)
+        vehicle = Car(price1, title.text, miles, re.findall(r'\d+\.\d+', distance.text.strip())[0], website)
         if isBlackListed(vehicle):
             continue
         else:
@@ -78,13 +95,22 @@ def Edmunds(url):               # Scrapes Edmunds
 
     for car in car_elements:
         price = car.find("span", class_="heading-3")
+        price = price.text
         title = car.find("div", class_="size-16 font-weight-bold mb-0_5 text-primary-darker")
         mileage = car.find("div", class_="key-point size-14 d-flex align-items-baseline mt-0_5 col-12")
+        mileage = mileage.text
+        miles = mileage[0:6]
         distance = car.find("span", class_="text-gray-dark")
         website1 = car.find("a", class_="usurp-inventory-card-vdp-link")
         website = "https://edmunds.com"+website1['href']
+        
+        counter = 0
+        price1 = ""
+        while counter < 7:
+            price1 += price[counter]
+            counter += 1
 
-        vehicle = Car(price.text, title.text, mileage.text, re.findall(r'\d', distance.text.strip())[0], website)
+        vehicle = Car(price1, title, miles, re.findall(r'\d', distance.text.strip())[0], website)
         if isBlackListed(vehicle):
             continue
         else:
@@ -105,13 +131,22 @@ def CarsForSale(url):           # Scrapes CarsForSale
 
     for car in car_elements:
         price = car.find("li", class_="snapshot__details-price")
+        price = price.text
         title = car.find("a", class_="snapshot__title")
         mileage = car.find("li", class_="snapshot__details-miles")
+        mileage = mileage.text
+        miles = mileage[0:6]
         distance = 0
         website1 = car.find("a", class_="snapshot__title")
         website = "https://carsforsale.com"+website1['href']
+        
+        counter = 0
+        price1 = ""
+        while counter < 7:
+            price1 += price[counter]
+            counter += 1
 
-        vehicle = Car(price.text, title.text, mileage.text, distance, website)
+        vehicle = Car(price1, title.text, miles, distance, website)
         if isBlackListed(vehicle):
             continue
         else:
@@ -124,7 +159,6 @@ def AutoTempest(url):           # Scrapes AutoTempest
     lst = []
     browser = webdriver.Chrome(executable_path=ChromeDriverManager().install())
     browser.get(url)
-    browser.implicitly_wait(2)
     soup = BeautifulSoup(browser.page_source, "html.parser")
     browser.close()
     results = soup.find(id="results-body")
@@ -132,13 +166,22 @@ def AutoTempest(url):           # Scrapes AutoTempest
 
     for car in car_elements:
         price = car.find("div", class_="badge__label label--price")
+        price = price.text
         title = car.find("span", class_="title-wrap listing-title")
         mileage = car.find("span", class_="mileage")
+        mileage = mileage.text
+        miles = mileage[0:6]
         website1 = car.find("span", class_="title-wrap listing-title")
         website2 = website1.find("a")
         website = website2['href']
 
-        vehicle = Car(price.text, title.text.rstrip().lstrip(), mileage.text, "10", website)
+        counter = 0
+        price1 = ""
+        while counter < 7:
+            price1 += price[counter]
+            counter += 1
+
+        vehicle = Car(price1, title.text.rstrip().lstrip(), miles, "10", website)
         if isBlackListed(vehicle):
             continue
         else:
@@ -189,6 +232,16 @@ def main():
         else:
             print("Error in urls.txt")
             return
+    
+    t1 = [i.getId() for i in todaysList]        # destroys duplicates
+    t2 = []
+    for i in range(len(todaysList)):
+        if t1.count(todaysList[i].getId()) > 1:
+            t1.remove(todaysList[i].getId())
+        else:
+            t2.append(todaysList[i])
+    
+    todaysList = t2
 
     if len(todaysList) == 0:            # checks if there are no new cars
         url = "https://puginarug.com/"

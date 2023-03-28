@@ -1,6 +1,6 @@
 class Car:
     def __init__(self, price, name, mileage, distance, website) -> None:
-        self._id = price+name+mileage
+        self._id = price+mileage
         self._price = price
         self._name = name
         self._mileage = mileage
