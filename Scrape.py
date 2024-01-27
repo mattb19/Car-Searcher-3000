@@ -3,6 +3,7 @@ from bs4 import BeautifulSoup
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.chrome.service import Service
 from webdriver_manager.chrome import ChromeDriverManager
 from Car import Car
 import re
@@ -85,7 +86,8 @@ def AutoTrader(url):            # Scrapes AutoTrader
 
 def Edmunds(url):               # Scrapes Edmunds
     lst = []
-    browser = webdriver.Chrome(executable_path=ChromeDriverManager().install())
+    service = Service(executable_path=ChromeDriverManager().install())
+    browser = webdriver.Chrome(service=service)
     browser.get(url)
     browser.implicitly_wait(2)
     soup = BeautifulSoup(browser.page_source, "html.parser")
@@ -121,7 +123,8 @@ def Edmunds(url):               # Scrapes Edmunds
 
 def CarsForSale(url):           # Scrapes CarsForSale
     lst = []
-    browser = webdriver.Chrome(executable_path=ChromeDriverManager().install())
+    service = Service(executable_path=ChromeDriverManager().install())
+    browser = webdriver.Chrome(service=service)
     browser.get(url)
     browser.implicitly_wait(2)
     soup = BeautifulSoup(browser.page_source, "html.parser")
@@ -157,7 +160,8 @@ def CarsForSale(url):           # Scrapes CarsForSale
 
 def AutoTempest(url):           # Scrapes AutoTempest
     lst = []
-    browser = webdriver.Chrome(executable_path=ChromeDriverManager().install())
+    service = Service(executable_path=ChromeDriverManager().install())
+    browser = webdriver.Chrome(service=service)
     browser.get(url)
     soup = BeautifulSoup(browser.page_source, "html.parser")
     browser.close()
@@ -267,10 +271,10 @@ def main():
             url = str(i.getWebsite())
 
             # MacOS
-            chrome_path = 'open -a /Applications/Google\ Chrome.app %s'
+            # chrome_path = 'open -a /Applications/Google\ Chrome.app %s'
 
             # Windows
-            # chrome_path = 'C:/Program Files (x86)/Google/Chrome/Application/chrome.exe %s'
+            chrome_path = 'C:/Program Files (x86)/Google/Chrome/Application/chrome.exe %s'
 
             # Linux
             # chrome_path = '/usr/bin/google-chrome %s'
